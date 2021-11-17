@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">dice_roller</string>
+    <string name="btn_name">Lancer Le Dé!</string>
+    <string name="hint_nb">Saisir nb de faces</string>
+</resources>
