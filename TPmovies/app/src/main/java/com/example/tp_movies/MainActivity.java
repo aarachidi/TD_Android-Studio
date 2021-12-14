@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -32,10 +33,15 @@ public class MainActivity extends AppCompatActivity {
     MovieService movieService;
     RecyclerView rvMovie;
     ImageButton popular_btn, new_btn;
+    boolean loading = true;
+    int pastVisiblesItems, visibleItemCount, totalItemCount;
+    int nextPage_popular = 2;
+    int nextPage_upcoming = 2;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        rvMovie = (RecyclerView) findViewById(R.id.rvMovies);
         movieService = new Retrofit.Builder()
                 .baseUrl(MovieService.apiURL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -45,12 +51,14 @@ public class MainActivity extends AppCompatActivity {
         popular_btn = (ImageButton) findViewById(R.id.imageButton_popular);
         popular_btn.setEnabled(false);
         popular_btn.setColorFilter(Color.argb(255, 195, 195, 195));
-
+        this.setTitle("Popular Movies");
+        popularMovies = new ArrayList<>();
+        upcomingMovies = new ArrayList<>();
         movieService.genreList().enqueue(new Callback<GenreList>() {
             @Override
             public void onResponse(Call<GenreList> call, Response<GenreList> response) {
                 genreList = response.body().getGenres();
-                System.out.println("result2222222"+ genreList.toString());
+                //System.out.println("result2222222"+ genreList.toString());
             }
 
             @Override
@@ -59,37 +67,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        movieService.upcomingMovies().enqueue(new Callback<MoviesList>() {
-            @Override
-            public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
-                upcomingMovies = response.body().getResults();
-            }
+        this.list_new(1);
 
-            @Override
-            public void onFailure(Call<MoviesList> call, Throwable t) {
+        this.list_popular(1);
 
-            }
-        });
 
-        movieService.listMovies().enqueue(new Callback<MoviesList>() {
-            @Override
-            public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
-                rvMovie = (RecyclerView) findViewById(R.id.rvMovies);
-                popularMovies = response.body().getResults();
-
-                MovieAdapter adapter = new MovieAdapter(popularMovies, genreList);
-
-                rvMovie.setAdapter(adapter);
-
-                rvMovie.setLayoutManager(new GridLayoutManager(MainActivity.this, 2));
-
-            }
-
-            @Override
-            public void onFailure(Call<MoviesList> call, Throwable t) {
-
-            }
-        });
 
         new_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
                 new_btn.setEnabled(false);
                 MovieAdapter adapter = new MovieAdapter(upcomingMovies, genreList);
                 rvMovie.setAdapter(adapter);
+                MainActivity.this.setTitle("Upcoming Movies");
+
 
             }
         });
@@ -114,7 +98,39 @@ public class MainActivity extends AppCompatActivity {
                 new_btn.setEnabled(true);
                 MovieAdapter adapter = new MovieAdapter(popularMovies, genreList);
                 rvMovie.setAdapter(adapter);
+                MainActivity.this.setTitle("Popular Movies");
 
+
+            }
+        });
+
+        rvMovie.addOnScrollListener(new RecyclerView.OnScrollListener()
+        {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy)
+            {
+                if(dy > 0) //check for scroll down
+                {
+
+                    visibleItemCount = rvMovie.getLayoutManager().getChildCount();
+                    totalItemCount = rvMovie.getLayoutManager().getItemCount();
+                    pastVisiblesItems = ((GridLayoutManager) rvMovie.getLayoutManager()).findFirstVisibleItemPosition();
+
+                    if (loading)
+                    {
+                        if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
+                        {
+                            if (new_btn.isEnabled())
+                            {
+                                MainActivity.this.list_popular(nextPage_popular);
+                                nextPage_popular++;
+                            }
+                            loading = false;
+                            Log.v(":::::::::::::::", "Last Item Wow ! "+ totalItemCount);
+                            //Do pagination.. i.e. fetch new data
+                        }
+                    }
+                }
             }
         });
 
@@ -122,4 +138,52 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    void list_new(int page) {
+        movieService.upcomingMovies(String.valueOf(page)).enqueue(new Callback<MoviesList>() {
+            @Override
+            public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
+                upcomingMovies.addAll(response.body().getResults());
+            }
+
+            @Override
+            public void onFailure(Call<MoviesList> call, Throwable t) {
+
+            }
+        });
+    }
+
+    void list_popular(int page) {
+        movieService.listMovies(String.valueOf(page)).enqueue(new Callback<MoviesList>() {
+            @Override
+            public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
+                popularMovies.addAll(response.body().getResults());
+
+                if(page ==1) {
+                    MovieAdapter adapter = new MovieAdapter(popularMovies, genreList);
+
+                    rvMovie.setAdapter(adapter);
+
+                    rvMovie.setLayoutManager(new GridLayoutManager(MainActivity.this, 2));
+
+                    //rvMovie.scrollToPosition(10);
+                }
+                else {
+                    MovieAdapter adapter = new MovieAdapter(popularMovies, genreList);
+                    rvMovie.setAdapter(adapter);
+                    rvMovie.scrollToPosition((page-1)*20);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<MoviesList> call, Throwable t) {
+
+            }
+        });
+    }
+
+
+
+
 }

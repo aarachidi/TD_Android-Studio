@@ -30,6 +30,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         genres = intent.getStringArrayListExtra("genres");
         Picasso.get().load("https://image.tmdb.org/t/p/original"+movie.getBackdrop_path()).into(imageView);
         overview.setText(movie.getOverview());
+        this.setTitle(movie.getTitle());
         releaseDate.setText(movie.getRelease_date());
         String gn = new String("");
         for (String str:

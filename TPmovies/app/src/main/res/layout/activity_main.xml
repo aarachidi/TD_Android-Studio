@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -18,23 +19,24 @@
         app:layout_constraintVertical_bias="0.0" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:layout_width="409dp"
-        android:layout_height="80dp"
+        android:layout_width="414dp"
+        android:layout_height="74dp"
         android:layout_marginTop="1dp"
-        android:background="#2196F3"
+        android:background="@color/purple_500"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rvMovies"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintVertical_bias="1.0">
 
         <ImageButton
             android:id="@+id/imageButton_popular"
             android:layout_width="98dp"
             android:layout_height="match_parent"
-            android:backgroundTint="#2196F3"
-            app:srcCompat="@android:drawable/btn_star_big_on"
+            android:layout_marginLeft="20dp"
+            android:backgroundTint="@color/purple_500"
+            app:srcCompat="@drawable/ic_baseline_star_24"
             app:tint="#FFFFFF"
             tools:ignore="SpeakableTextPresentCheck" />
 
@@ -43,8 +45,8 @@
             android:layout_width="98dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="300dp"
-            android:backgroundTint="#2196F3"
-            app:srcCompat="@android:drawable/ic_popup_sync"
+            android:backgroundTint="@color/purple_500"
+            app:srcCompat="@drawable/ic_baseline_fiber_new_24"
             app:tint="#FFFFFF"
             tools:ignore="SpeakableTextPresentCheck" />
     </com.google.android.material.bottomnavigation.BottomNavigationView>
